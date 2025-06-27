@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medamel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <script type="importmap">
+{
+  "imports": {
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.6.2",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "uuid": "https://esm.sh/uuid@^11.1.0",
+    "chart.js/": "https://esm.sh/chart.js@^4.5.0/",
+    "react-beautiful-dnd": "https://esm.sh/react-beautiful-dnd@^13.1.1",
+    "firebase/": "https://esm.sh/firebase@^11.9.1/",
+    "react-modal": "https://esm.sh/react-modal@^3.16.3",
+    "@uiw/react-md-editor": "https://esm.sh/@uiw/react-md-editor@^4.0.7"
+  }
+}
+</script>
+  <script type="module">
+    const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+    if (gaId) {
+      const script1 = document.createElement('script');
+      script1.async = true;
+      script1.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+      document.head.appendChild(script1);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      window.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', gaId);
+    }
+  </script>
+<style>
+  /* Styles for react-md-editor dark mode specifically, 
+     if Tailwind dark variants aren't sufficient or too complex to apply directly.
+     These will be applied based on the 'dark' class on the html element. */
+  html.dark .wmde-markdown-var, 
+  html.dark .wmde-markdown hr, 
+  html.dark .wmde-markdown ol, 
+  html.dark .wmde-markdown pre, 
+  html.dark .wmde-markdown ul {
+    border-color: #374151 !important; /* Tailwind gray-700 */
+    background-color: #1f2937 !important; /* Tailwind gray-800 */
+    color: #d1d5db !important; /* Tailwind gray-300 */
+  }
+  html.dark .w-md-editor-toolbar {
+    background-color: #374151 !important; /* Tailwind gray-700 */
+    border-color: #4b5563 !important; /* Tailwind gray-600 */
+  }
+   html.dark .w-md-editor-toolbar button svg {
+    color: #9ca3af !important; /* Tailwind gray-400 */
+  }
+   html.dark .w-md-editor-text-input,
+   html.dark .w-md-editor-text-pre {
+    color: #d1d5db !important; /* Tailwind gray-300 */
+   }
+   html.dark .wmde-markdown code {
+    background-color: #374151 !important; /* gray-700 */
+    color: #e5e7eb !important; /* gray-200 */
+   }
+</style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-slate-900 text-slate-200">
+  <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
+</body>
+</html>

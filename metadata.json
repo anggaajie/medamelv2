@@ -1,0 +1,6 @@
+{
+  "name": "Medamel",
+  "description": "Aplikasi Assesmen Tenaga Kerja Kota Cilegon.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "prompt": ""
+}

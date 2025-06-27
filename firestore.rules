@@ -1,0 +1,113 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can create, read and update their own user document.
+    // User creation is typically handled via Firebase Auth triggers or backend logic.
+    match /users/{userId} {
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+
+      // Rules for CV subcollection
+      // Users can create, read, update, and delete their own CVs.
+      match /cvs/{cvId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Users can read and write their own notifications
+      match /notifications/{notificationId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Users can create activity logs for themselves, but not view/update/delete them.
+      match /activity/{activityId} {
+        allow create: if request.auth != null && request.auth.uid == userId;
+        allow read, update, delete: if false; 
+      }
+    }
+
+    // Psychometric test results - users can only create and read their own results
+    match /psychometricTestResults/{resultId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update, delete: if false; // Results cannot be modified once submitted
+    }
+
+    // User activity logs - users can only create their own logs
+    match /userActivityLogs/{logId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if false; // Only admins should be able to read these
+    }
+
+    // CVs collection - users can only access their own CVs
+    match /cvs/{cvId} {
+      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Job postings can be read by anyone (if public), but only created/updated 
+    // by users with a 'company' role.
+    match /jobPostings/{jobId} {
+      allow read: if true;
+      allow create, update: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'company';
+      allow delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'company';
+    }
+
+    // Training programs can be read by anyone, but only managed by training providers.
+    match /trainingPrograms/{programId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'training_provider';
+    }
+
+    // Job applications can be created by any authenticated user.
+    // They can only be read by the applicant or the company that posted the job.
+    match /jobApplications/{applicationId} {
+      allow create: if request.auth != null && request.resource.data.applicantId == request.auth.uid;
+      allow read: if request.auth != null && 
+                    (resource.data.applicantId == request.auth.uid || 
+                     get(/databases/$(database)/documents/jobPostings/$(resource.data.jobId)).data.companyId == request.auth.uid);
+      // Companies can update the status
+      allow update: if request.auth != null &&
+                     get(/databases/$(database)/documents/jobPostings/$(resource.data.jobId)).data.companyId == request.auth.uid;
+    }
+
+    // Internship programs can be read by anyone (if active), but only created/updated 
+    // by users with a 'company' role.
+    match /internshipPrograms/{internshipId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'company';
+    }
+
+    // Internship applications can be created by any authenticated user.
+    // They can only be read by the applicant or the company that posted the internship.
+    match /internshipApplications/{applicationId} {
+      allow create: if request.auth != null && request.resource.data.applicantId == request.auth.uid;
+      allow read: if request.auth != null && 
+                    (resource.data.applicantId == request.auth.uid || 
+                     get(/databases/$(database)/documents/internshipPrograms/$(resource.data.internshipId)).data.companyId == request.auth.uid);
+      // Companies can update the status
+      allow update: if request.auth != null &&
+                     get(/databases/$(database)/documents/internshipPrograms/$(resource.data.internshipId)).data.companyId == request.auth.uid;
+    }
+
+    // Training registrations can be created by any authenticated user.
+    // They can only be read by the registrant or the training provider.
+    match /trainingRegistrations/{registrationId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && 
+                    (resource.data.userId == request.auth.uid || 
+                     get(/databases/$(database)/documents/trainingPrograms/$(resource.data.programId)).data.providerId == request.auth.uid);
+      // Training providers can update the status
+      allow update: if request.auth != null &&
+                     get(/databases/$(database)/documents/trainingPrograms/$(resource.data.programId)).data.providerId == request.auth.uid;
+    }
+    
+    // Allow admins to do anything for administrative purposes
+    match /{document=**} {
+      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+  }
+}
+
+
+
